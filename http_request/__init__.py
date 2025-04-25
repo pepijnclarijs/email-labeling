@@ -1,6 +1,6 @@
 import logging
-import azure.functions as func
+import azure.functions as af
 
-def main(req: func.HttpRequest) -> func.HttpResponse:
+def main(req: af.HttpRequest) -> af.HttpResponse:
     logging.info("Python HTTP trigger function processed a request.")
-    return func.HttpResponse("Hello from Azure Function!", status_code=200)
+    return af.HttpResponse("Hello from Azure Function!", status_code=200)
