@@ -1,0 +1,13 @@
+# Terraform folders
+.terraform/
+terraform.tfstate*
+!.terraform.lock.hcl
+
+# Infracost generated files (if not needed)
+.infracost/
+
+# Generated pricing file
+.pricing.gob
+
+# Provider binary (if present)
+terraform-provider-azurerm
