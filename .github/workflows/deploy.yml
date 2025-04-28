@@ -1,0 +1,48 @@
+name: Deploy to Azure Functions
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repository.
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Set up Python (needed for running uv pack).
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      # 3. Install uv (our packager) so we can build the zip package.
+      - name: Install uv packager
+        run: pip install uv
+
+      # 4. Build the deployment package.
+      # This command packages azure_app, host.json, pyproject.toml, and uv.lock together.
+      - name: Build function package
+        run: uv pack azure_app host.json pyproject.toml uv.lock host.json --output my-azure-function.zip
+
+      # 5. Log in to Azure using your service principal credentials.
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 6. Upload the package to Azure Blob Storage, overwriting the existing blob.
+      # The blob is named "function.zip" in the "functions" container of your storage account.
+      - name: Upload package to Azure Storage
+        run: |
+          az storage blob upload \
+            --account-name emaillabelingstg \
+            --container-name functions \
+            --name function.zip \
+            --file my-azure-function.zip \
+            --overwrite \
+            --auth-mode login
