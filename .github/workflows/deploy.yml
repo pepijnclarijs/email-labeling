@@ -17,6 +17,7 @@ jobs:
       AZURE_STORAGE_ACCOUNT: 'emaillabelingstg' # Your Azure Storage account name
       AZURE_STORAGE_CONTAINER: 'functions' # Your Blob container name
       AZURE_BLOB_NAME: 'function.zip' # Name of the blob in Azure Storage
+      REQUIREMENTS_FILE: 'requirements.txt'
 
     steps:
       # 1. Checkout the repository content
@@ -39,8 +40,9 @@ jobs:
         run: |
           # Add uv to the path (installation script usually does this, but belt-and-suspenders)
           source $HOME/.cargo/env
+
           # Install dependencies defined in pyproject.toml into the target directory
-          uv pip install --target="${{ env.PACKAGE_DIR }}/lib/site-packages"
+          uv pip install --target="${{ env.PACKAGE_DIR }}/lib/site-packages" .
 
       # 5. Create the deployment zip package
       # Include the code, dependencies folder, host.json, pyproject.toml, uv.lock etc.
