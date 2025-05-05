@@ -12,7 +12,7 @@ jobs:
       # Define environment variables for clarity and reuse
       PYTHON_VERSION: '3.12' # Ensure this matches your Azure Function runtime version
       PACKAGE_DIR: '.python_packages' # Standard directory for pre-installed packages
-      FUNCTION_APP_CODE_DIR: 'azure_app' # Adjust if your function code is elsewhere
+      FUNCTION_APP_CODE_DIR: 'http_request' # Adjust if your function code is elsewhere
       DEPLOYMENT_ZIP_NAME: 'my-azure-function.zip' # Name of the zip file to create
       AZURE_STORAGE_ACCOUNT: 'emaillabelingstg' # Your Azure Storage account name
       AZURE_STORAGE_CONTAINER: 'functions' # Your Blob container name
