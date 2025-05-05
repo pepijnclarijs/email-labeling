@@ -48,13 +48,23 @@ jobs:
       # Include the code, dependencies folder, host.json, pyproject.toml, uv.lock etc.
       - name: Create deployment package
         run: |
-          zip -r ${{ env.DEPLOYMENT_ZIP_NAME }} \
-            ${{ env.PACKAGE_DIR }} \
-            ${{ env.FUNCTION_APP_CODE_DIR }} \
-            host.json \
-            pyproject.toml \
-            uv.lock # Include lock file for reference/reproducibility if desired
-          # Add any other files/folders needed at the root level, e.g., proxies.json
+          # Create the deploy_dir where we will collect all the necessary files
+          mkdir -p deploy_dir/azure_app
+          
+          # Copy all files from http_request into the azure_app directory, flattening the structure
+          cp -r ${{ env.FUNCTION_APP_CODE_DIR }}/* deploy_dir/azure_app/
+          
+          # Copy other necessary root files (host.json, pyproject.toml, uv.lock)
+          cp host.json pyproject.toml uv.lock deploy_dir/
+          
+          # Copy the dependencies folder (.python_packages) if it exists
+          cp -r ${{ env.PACKAGE_DIR }} deploy_dir/
+          
+          # Navigate to the deploy_dir and zip the contents
+          cd deploy_dir
+          zip -r ../${{ env.DEPLOYMENT_ZIP_NAME }} *
+          cd ..
+    
 
       # 6. Log in to Azure using service principal credentials
       - name: Login to Azure
