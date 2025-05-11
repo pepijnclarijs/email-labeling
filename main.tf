@@ -64,7 +64,7 @@ data "azurerm_storage_account_sas" "function_sas" {
 }
 
 resource "azurerm_service_plan" "consumption" {
-  name                = "example-consumption-plan"
+  name                = "consumption-plan-email-labeling"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
