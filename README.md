@@ -89,7 +89,7 @@ Such an app registration defines:
 
 
 # --- Seting up Microsoft Graph for Email fetching --- #
-My function app needs to have the right permissions in order to fetch emails from outlook mailboxes. For this, the function app needs:
+My function app needs to have the right permissions in order to fetch emails from outlook mailboxes. For this, the function app needs an App Registration with the right permissions set. 
 
-*) An App Registration
+TODO: Debug new terraform main.
 
