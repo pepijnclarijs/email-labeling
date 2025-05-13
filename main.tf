@@ -175,3 +175,42 @@ resource "azurerm_key_vault_access_policy" "current_user" {
 
   secret_permissions = ["Get", "List", "Set", "Delete", "Recover", "Restore", "Purge"]
 }
+
+
+# --- For CI/CD with GitHub --- #
+
+# GitHub Actions App Registration
+resource "azuread_application" "github_actions_app" {
+  display_name = "GitHubActionsEmailDeployer"
+}
+
+# App Secret for GitHub Actions
+resource "azuread_application_password" "github_actions_secret" {
+  application_id = azuread_application.github_actions_app.id
+  display_name   = "GitHubActionsSecret"
+  end_date       = timeadd("2025-05-13T00:00:00Z", "8760h") # 1 year
+}
+
+# Service Principal associated with the App Registration
+resource "azuread_service_principal" "github_actions_sp" {
+  client_id = azuread_application.github_actions_app.client_id
+}
+
+# Assign Contributor role to Service Principal (for example)
+resource "azurerm_role_assignment" "github_actions_sp_contributor" {
+  scope                = azurerm_resource_group.rg.id
+  role_definition_name = "Contributor"
+  principal_id         = azuread_service_principal.github_actions_sp.object_id
+}
+
+# Outputs for GitHub Actions secrets
+output "github_actions_credentials_json" {
+  value = jsonencode({
+    clientId                   = azuread_application.github_actions_app.client_id
+    clientSecret               = azuread_application_password.github_actions_secret.value
+    tenantId                   = data.azurerm_client_config.current.tenant_id
+    subscriptionId             = data.azurerm_client_config.current.subscription_id
+    resourceManagerEndpointUrl = "https://management.azure.com/"
+  })
+  sensitive = true
+}
