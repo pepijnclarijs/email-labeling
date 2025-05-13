@@ -105,8 +105,8 @@ resource "azurerm_linux_function_app" "alfa" {
   service_plan_id            = azurerm_service_plan.consumption.id
 
   app_settings = {
-    "FUNCTIONS_WORKER_RUNTIME"   = "python"
-    "WEBSITE_RUN_FROM_PACKAGE"  = "https://${azurerm_storage_account.sa.name}.blob.core.windows.net/${azurerm_storage_container.functions.name}/${azurerm_storage_blob.function_zip.name}?${data.azurerm_storage_account_sas.function_sas.sas}"
+    "FUNCTIONS_WORKER_RUNTIME" = "python"
+    "WEBSITE_RUN_FROM_PACKAGE" = "https://${azurerm_storage_account.sa.name}.blob.core.windows.net/${azurerm_storage_container.functions.name}/${azurerm_storage_blob.function_zip.name}?${data.azurerm_storage_account_sas.function_sas.sas}"
   }
 
   site_config {
@@ -126,7 +126,7 @@ resource "azuread_application" "email_app" {
 
   # Requests delegated Mail.Read permission from Microsoft Graph
   required_resource_access {
-    resource_app_id = azuread_service_principal.msgraph.app_id
+    resource_app_id = data.azuread_application_published_app_ids.well_known.result["MicrosoftGraph"]
 
     resource_access {
       id   = azuread_service_principal.msgraph.app_role_ids["Mail.Read"]
@@ -137,32 +137,32 @@ resource "azuread_application" "email_app" {
 
 # Creates a client secret for the App Registration
 resource "azuread_application_password" "app_secret" {
-  application_object_id = azuread_application.email_app.object_id
-  display_name          = "EmailLabelingAppSecret"
-  end_date_relative     = "8760h" # 1 year
+  application_id = azuread_application.email_app.id
+  display_name   = "EmailLabelingAppSecret"
+  end_date       = timeadd("2025-05-13T16:22:36Z", "8760h") # 1 year
 }
 
 # Creates a Key Vault to securely store secrets (e.g., client ID and client secret)
 resource "azurerm_key_vault" "kv" {
-  name                        = "emailLabelingKv"
-  location                    = azurerm_resource_group.rg.location
-  resource_group_name         = azurerm_resource_group.rg.name
-  tenant_id                   = data.azurerm_client_config.current.tenant_id
-  sku_name                    = "standard"
-  purge_protection_enabled    = false
-  soft_delete_retention_days  = 7
+  name                       = "emailLabelingKv"
+  location                   = azurerm_resource_group.rg.location
+  resource_group_name        = azurerm_resource_group.rg.name
+  tenant_id                  = data.azurerm_client_config.current.tenant_id
+  sku_name                   = "standard"
+  purge_protection_enabled   = false
+  soft_delete_retention_days = 7
 }
 
 # Stores the client ID in Key Vault
 resource "azurerm_key_vault_secret" "client_id" {
-  name         = "ClientId"
-  value        = azuread_application.email_app.application_id
+  name         = "ClientIdEmailLabelingApp"
+  value        = azuread_application.email_app.id
   key_vault_id = azurerm_key_vault.kv.id
 }
 
 # Stores the client secret in Key Vault
 resource "azurerm_key_vault_secret" "client_secret" {
-  name         = "ClientSecret"
+  name         = "ClientSecretEmailLabelingApp"
   value        = azuread_application_password.app_secret.value
   key_vault_id = azurerm_key_vault.kv.id
 }
@@ -173,5 +173,5 @@ resource "azurerm_key_vault_access_policy" "current_user" {
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = data.azurerm_client_config.current.object_id
 
-  secret_permissions = ["get", "list", "set"]
+  secret_permissions = ["Get", "List", "Set", "Delete", "Recover", "Restore", "Purge"]
 }
