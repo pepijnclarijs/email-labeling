@@ -1,6 +1,41 @@
 # email-labeling
 Email labeling project
 
+# Prerequisites
+🔐 GitHub CLI Prerequisite: Authenticate to GitHub
+To securely add Azure credentials to your GitHub repository as secrets, ensure the following setup is complete:
+
+✅ Prerequisite
+You must be authenticated with GitHub via the command line using the GitHub CLI (gh):
+
+bash
+Kopiëren
+Bewerken
+gh auth login
+This command will guide you through logging into your GitHub account and authorizing the CLI to access your repositories.
+
+⚠️ This step must be completed before running any gh secret set commands used to configure secrets for GitHub Actions.
+
+# Quickstart
+Make sure the requirements in the prerequisites are met. Then run 
+
+```terraform plan```
+
+To see what resources will be created.
+If you agree with the plan, run 
+
+```terraform apply```
+
+When prompted, type yes. When terraform is done creating resources, it should show:
+
+```
+Outputs:
+
+github_actions_credentials_json = <sensitive>
+```
+
+These credentials must be set as a secret in your github repo to allow the github actions to push files to your newly created azure storage container.
+
 
 # Diary
 1) Firstly, create git repo for new project
@@ -91,5 +126,6 @@ Such an app registration defines:
 # --- Seting up Microsoft Graph for Email fetching --- #
 My function app needs to have the right permissions in order to fetch emails from outlook mailboxes. For this, the function app needs an App Registration with the right permissions set. 
 
-TODO: Debug new terraform main.
-
+TODO: Add creation of github app service and service principal to terraform file and automate the 
+addition of the credentials needed for the azure service principle to github secrets.
+TODO: Figure out how the github workflow deployment actually works. It's kind of a mess now.
