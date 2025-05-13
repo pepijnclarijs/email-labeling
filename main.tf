@@ -196,10 +196,10 @@ resource "azuread_service_principal" "github_actions_sp" {
   client_id = azuread_application.github_actions_app.client_id
 }
 
-# Assign Contributor role to Service Principal (for example)
-resource "azurerm_role_assignment" "github_actions_sp_contributor" {
-  scope                = azurerm_resource_group.rg.id
-  role_definition_name = "Contributor"
+# Assign Storage Blob Data Contributor role to Service Principal
+resource "azurerm_role_assignment" "github_actions_blob_data_contributor" {
+  scope                = azurerm_storage_account.sa.id
+  role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azuread_service_principal.github_actions_sp.object_id
 }
 
