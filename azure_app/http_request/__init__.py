@@ -7,7 +7,7 @@ import httpx
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 TENANT_ID = os.getenv("TENANT_ID")
-REDIRECT_URI = os.getenv("REDIRECT_URI") or "https://<your-function-url>/api/http_request"
+REDIRECT_URI = os.getenv("REDIRECT_URI") or "https://<your-function-url>/api/azure_app"
 SCOPE = "Mail.Read"
 
 AUTH_URL = f"https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/authorize"

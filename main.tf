@@ -119,7 +119,7 @@ resource "azurerm_linux_function_app" "alfa" {
     "CLIENT_ID"                    = azuread_application.email_app.client_id
     "CLIENT_SECRET"                = azuread_application_password.email_app_secret.value
     "TENANT_ID"                    = data.azurerm_client_config.current.tenant_id
-    "REDIRECT_URI"                 = "https://${var.function_app_name}.azurewebsites.net/api/http_request"  
+    "REDIRECT_URI"                 = "https://${var.function_app_name}.azurewebsites.net/api/azure_app"  
   }
 
   site_config {
@@ -142,7 +142,7 @@ resource "azuread_application" "email_app" {
   display_name = "EmailLabelingApp"
 
   web {
-    redirect_uris = ["https://${var.function_app_name}.azurewebsites.net/.auth/login/aad/callback"]
+    redirect_uris = ["https://${var.function_app_name}.azurewebsites.net/api/azure_app"]  # TODO: This name is actually dependent on the folder name of the function app. Also, this redirect URI must be exactly the same as the ones used in the environment variables of the function app.
     implicit_grant {
       access_token_issuance_enabled = true
       id_token_issuance_enabled     = true
