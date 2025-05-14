@@ -49,6 +49,15 @@ resource "azurerm_storage_blob" "function_zip" {
   storage_container_name = azurerm_storage_container.functions.name
   type                   = "Block"
   source                 = "./placeholder_file.zip"
+
+  lifecycle {
+    ignore_changes = [
+      source,
+      content_md5,
+      content_type,
+      metadata
+    ]
+  }
 }
 
 # Generates a Shared Access Signature (SAS) token for the uploaded blob
