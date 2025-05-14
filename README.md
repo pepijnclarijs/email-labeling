@@ -1,20 +1,27 @@
 # email-labeling
 Email labeling project
 
+# TODO's
+TODO: Figure out how the github workflow deployment actually works. It's kind of a mess now. Or at least, my understanding of it is.
+TODO: Create a login flow to authorize reading of mailboxes.
+
 # Prerequisites
 🔐 GitHub CLI Prerequisite: Authenticate to GitHub
 To securely add Azure credentials to your GitHub repository as secrets, ensure the following setup is complete:
 
 ✅ Prerequisite
 You must be authenticated with GitHub via the command line using the GitHub CLI (gh):
-
-bash
-Kopiëren
-Bewerken
 gh auth login
 This command will guide you through logging into your GitHub account and authorizing the CLI to access your repositories.
 
 ⚠️ This step must be completed before running any gh secret set commands used to configure secrets for GitHub Actions.
+
+Azure Login.
+To be able to connect to azure, you must be logged in using the cli command:
+```az login```
+This will guide you through the steps to logging in to your azure account. To check if you logged in
+successfully, run 
+```az account show```
 
 # Quickstart
 Make sure the requirements in the prerequisites are met. Then run 
@@ -125,7 +132,30 @@ Such an app registration defines:
 
 # --- Seting up Microsoft Graph for Email fetching --- #
 My function app needs to have the right permissions in order to fetch emails from outlook mailboxes. For this, the function app needs an App Registration with the right permissions set. 
+I am using a managed identity to have my azure function app authenticate against microsoft graph.
+I need to create a workflow where the user can authenticate via Azure AD and authorize my function app to access their email using OAuth 2.0 Authorization Code Grant Flow.
 
-TODO: Add creation of github app service and service principal to terraform file and automate the 
-addition of the credentials needed for the azure service principle to github secrets.
-TODO: Figure out how the github workflow deployment actually works. It's kind of a mess now.
+### So who is authenticating against what?
+There are two "Who's" involved:
+
+1) The function app
+This is the code running in Azure.
+This code needs permission to call Microsoft Graph
+
+2) The user
+This is the human logging into the app.
+The user is the owner of their mailbox and must consent the app to read their mail.
+
+Azure AD manages users, apps, logins and consent. When your app wants to read John’s email, Azure AD asks John:
+
+“Hey, this app wants to read your email. Do you agree?”
+
+If he agrees, Azure AD gives the app an access token which the app can use to call Microsoft Graph on John's behalf.
+
+### What is OAuth 2.0?
+OAuth 2.0 is an industry standard way of letting apps act on behalf of users. It defines how:
+*) A user logs in
+*) The app gets permission
+*) The app gets an access token
+
+
