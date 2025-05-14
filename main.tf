@@ -95,18 +95,31 @@ resource "azurerm_service_plan" "consumption" {
   os_type             = "Linux"
 }
 
+variable "function_app_name" {
+  default = "peps-email-labeling-app"
+}
+
 # Deploys the Azure Linux Function App
 resource "azurerm_linux_function_app" "alfa" {
-  name                       = "peps-email-labeling-app"
+  name                       = var.function_app_name
   resource_group_name        = azurerm_resource_group.rg.name
   location                   = azurerm_resource_group.rg.location
   storage_account_name       = azurerm_storage_account.sa.name
   storage_account_access_key = azurerm_storage_account.sa.primary_access_key
   service_plan_id            = azurerm_service_plan.consumption.id
 
+  # Make a system assigned managed identity available to the Function App
+  identity {
+    type = "SystemAssigned"
+  }
+
   app_settings = {
-    "FUNCTIONS_WORKER_RUNTIME" = "python"
-    "WEBSITE_RUN_FROM_PACKAGE" = "https://${azurerm_storage_account.sa.name}.blob.core.windows.net/${azurerm_storage_container.functions.name}/${azurerm_storage_blob.function_zip.name}?${data.azurerm_storage_account_sas.function_sas.sas}"
+    "FUNCTIONS_WORKER_RUNTIME"      = "python"
+    "WEBSITE_RUN_FROM_PACKAGE"      = "https://${azurerm_storage_account.sa.name}.blob.core.windows.net/${azurerm_storage_container.functions.name}/${azurerm_storage_blob.function_zip.name}?${data.azurerm_storage_account_sas.function_sas.sas}"
+    "CLIENT_ID"                    = azuread_application.email_app.client_id
+    "CLIENT_SECRET"                = azuread_application_password.email_app_secret.value
+    "TENANT_ID"                    = data.azurerm_client_config.current.tenant_id
+    "REDIRECT_URI"                 = "https://${var.function_app_name}.azurewebsites.net/api/http_request"  
   }
 
   site_config {
@@ -116,12 +129,24 @@ resource "azurerm_linux_function_app" "alfa" {
   }
 }
 
+# Create a client secret for the EmailLabelingApp (used in OAuth login)
+resource "azuread_application_password" "email_app_secret" {
+  application_id = azuread_application.email_app.id
+  display_name   = "EmailLabelingAppSecret"
+  end_date       = timeadd("2025-05-14T00:00:00Z", "8760h") # 1 year
+}
+
+
 # Registers a new Azure AD Application (App Registration) for OAuth2 access to Microsoft Graph
 resource "azuread_application" "email_app" {
   display_name = "EmailLabelingApp"
 
   web {
-    redirect_uris = ["http://localhost:8000/callback"]
+    redirect_uris = ["https://${var.function_app_name}.azurewebsites.net/.auth/login/aad/callback"]
+    implicit_grant {
+      access_token_issuance_enabled = true
+      id_token_issuance_enabled     = true
+    }
   }
 
   # Requests delegated Mail.Read permission from Microsoft Graph
@@ -132,50 +157,18 @@ resource "azuread_application" "email_app" {
       id   = azuread_service_principal.msgraph.app_role_ids["Mail.Read"]
       type = "Scope"
     }
+
+    resource_access {
+      id   = azuread_service_principal.msgraph.app_role_ids["Mail.ReadWrite"]
+      type = "Scope"
+    }
+
+    resource_access {
+      id   = azuread_service_principal.msgraph.app_role_ids["MailboxSettings.Read"]
+      type = "Scope"
+    }
   }
 }
-
-# Creates a client secret for the App Registration
-resource "azuread_application_password" "app_secret" {
-  application_id = azuread_application.email_app.id
-  display_name   = "EmailLabelingAppSecret"
-  end_date       = timeadd("2025-05-13T16:22:36Z", "8760h") # 1 year
-}
-
-# Creates a Key Vault to securely store secrets (e.g., client ID and client secret)
-resource "azurerm_key_vault" "kv" {
-  name                       = "emailLabelingKv"
-  location                   = azurerm_resource_group.rg.location
-  resource_group_name        = azurerm_resource_group.rg.name
-  tenant_id                  = data.azurerm_client_config.current.tenant_id
-  sku_name                   = "standard"
-  purge_protection_enabled   = false
-  soft_delete_retention_days = 7
-}
-
-# Stores the client ID in Key Vault
-resource "azurerm_key_vault_secret" "client_id" {
-  name         = "ClientIdEmailLabelingApp"
-  value        = azuread_application.email_app.id
-  key_vault_id = azurerm_key_vault.kv.id
-}
-
-# Stores the client secret in Key Vault
-resource "azurerm_key_vault_secret" "client_secret" {
-  name         = "ClientSecretEmailLabelingApp"
-  value        = azuread_application_password.app_secret.value
-  key_vault_id = azurerm_key_vault.kv.id
-}
-
-# Grants the currently authenticated user/service principal permission to manage secrets in the Key Vault
-resource "azurerm_key_vault_access_policy" "current_user" {
-  key_vault_id = azurerm_key_vault.kv.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = data.azurerm_client_config.current.object_id
-
-  secret_permissions = ["Get", "List", "Set", "Delete", "Recover", "Restore", "Purge"]
-}
-
 
 # --- For CI/CD with GitHub --- #
 
