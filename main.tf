@@ -123,12 +123,13 @@ resource "azurerm_linux_function_app" "alfa" {
   }
 
   app_settings = {
-    "FUNCTIONS_WORKER_RUNTIME"      = "python"
-    "WEBSITE_RUN_FROM_PACKAGE"      = "https://${azurerm_storage_account.sa.name}.blob.core.windows.net/${azurerm_storage_container.functions.name}/${azurerm_storage_blob.function_zip.name}?${data.azurerm_storage_account_sas.function_sas.sas}"
-    "CLIENT_ID"                    = azuread_application.email_app.client_id
-    "CLIENT_SECRET"                = azuread_application_password.email_app_secret.value
-    "TENANT_ID"                    = data.azurerm_client_config.current.tenant_id
-    "REDIRECT_URI"                 = "https://${var.function_app_name}.azurewebsites.net/api/azure_app"  
+    "FUNCTIONS_WORKER_RUNTIME" = "python"
+    "WEBSITE_RUN_FROM_PACKAGE" = "https://${azurerm_storage_account.sa.name}.blob.core.windows.net/${azurerm_storage_container.functions.name}/${azurerm_storage_blob.function_zip.name}?${data.azurerm_storage_account_sas.function_sas.sas}"
+    "CLIENT_ID"                = azuread_application.email_app.client_id
+    "CLIENT_SECRET"            = azuread_application_password.email_app_secret.value
+    "TENANT_ID"                = data.azurerm_client_config.current.tenant_id
+    "REDIRECT_URI"             = "https://login.microsoftonline.com/common/oauth2/nativeclient"
+
   }
 
   site_config {
@@ -151,7 +152,7 @@ resource "azuread_application" "email_app" {
   display_name = "EmailLabelingApp"
 
   web {
-    redirect_uris = ["https://${var.function_app_name}.azurewebsites.net/api/azure_app"]  # TODO: This name is actually dependent on the folder name of the function app. Also, this redirect URI must be exactly the same as the ones used in the environment variables of the function app.
+    redirect_uris = ["https://login.microsoftonline.com/common/oauth2/nativeclient"] # TODO: This name is actually dependent on the folder name of the function app. Also, this redirect URI must be exactly the same as the ones used in the environment variables of the function app.
     implicit_grant {
       access_token_issuance_enabled = true
       id_token_issuance_enabled     = true
@@ -174,6 +175,26 @@ resource "azuread_application" "email_app" {
 
     resource_access {
       id   = azuread_service_principal.msgraph.app_role_ids["MailboxSettings.Read"]
+      type = "Scope"
+    }
+
+    resource_access {
+      id   = azuread_service_principal.msgraph.app_role_ids["Mail.Send"]
+      type = "Scope"
+    }
+    
+    resource_access {
+      id   = azuread_service_principal.msgraph.app_role_ids["MailboxSettings.Read"]
+      type = "Scope"
+    }
+
+    resource_access {
+      id   = azuread_service_principal.msgraph.app_role_ids["User.Read"]
+      type = "Scope"
+    }
+
+    resource_access {
+      id   = azuread_service_principal.msgraph.app_role_ids["offline_access"]
       type = "Scope"
     }
   }
