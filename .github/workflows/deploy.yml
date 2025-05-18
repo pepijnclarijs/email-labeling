@@ -12,7 +12,7 @@ jobs:
       # Define environment variables for clarity and reuse
       PYTHON_VERSION: '3.12' # Ensure this matches your Azure Function runtime version
       PACKAGE_DIR: '.python_packages' # Standard directory for pre-installed packages
-      FUNCTION_APP_CODE_DIR: 'azure_app/http_request' # Adjust if your function code is elsewhere
+      FUNCTION_APP_CODE_DIR: 'azure_app' # Adjust if your function code is elsewhere
       DEPLOYMENT_ZIP_NAME: 'my-azure-function.zip' # Name of the zip file to create
       AZURE_STORAGE_ACCOUNT: 'emaillabelingstg' # Your Azure Storage account name
       AZURE_STORAGE_CONTAINER: 'functions' # Your Blob container name
@@ -51,7 +51,7 @@ jobs:
           # Create the deploy_dir where we will collect all the necessary files
           mkdir -p deploy_dir/azure_app
           
-          # Copy all files from http_request into the azure_app directory, flattening the structure
+          # Copy all files into the azure_app directory, flattening the structure
           cp -r ${{ env.FUNCTION_APP_CODE_DIR }}/* deploy_dir/azure_app/
           
           # Copy other necessary root files (host.json, pyproject.toml, uv.lock)

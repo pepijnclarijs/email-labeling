@@ -159,3 +159,11 @@ OAuth 2.0 is an industry standard way of letting apps act on behalf of users. It
 *) The app gets an access token
 
 
+
+I am now going to try using the o365 python library to handle logins. I am also going to refactor
+code so that I can run the az function app locally. For this, I need the azure functions core tool,
+which is a cli tool. Install it by:
+
+```
+npm install -g azure-functions-core-tools@4 --unsafe-perm true
+```
