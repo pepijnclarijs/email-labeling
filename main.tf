@@ -152,14 +152,31 @@ resource "azurerm_linux_function_app" "alfa" {
     "CLIENT_ID"                = azuread_application.email_app.client_id
     "CLIENT_SECRET"            = azuread_application_password.email_app_secret.value
     "TENANT_ID"                = data.azurerm_client_config.current.tenant_id
-    "REDIRECT_URI"             = "http://localhost:7071/api/auth-callback"
+    "REDIRECT_URI"             = "https://peps-email-labeling-app.azurewebsites.net/api/auth-callback"
+    
+    # Application Insights integration
+    "APPINSIGHTS_INSTRUMENTATIONKEY"        = azurerm_application_insights.app_insights.instrumentation_key
+    "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
   }
 
   site_config {
     application_stack {
       python_version = "3.12"
     }
+    cors {
+      allowed_origins = [
+        "https://portal.azure.com"
+      ]
+    }
   }
+}
+
+# For logging
+resource "azurerm_application_insights" "app_insights" {
+  name                = "email-labeling-appinsights"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  application_type    = "web"
 }
 
 # Create a client secret for the EmailLabelingApp (used in OAuth login)
@@ -192,7 +209,7 @@ resource "azuread_application" "email_app" {
   }
 
   web {
-    redirect_uris = ["http://localhost:7071/api/auth-callback"] # TODO: This name is actually dependent on the folder name of the function app. Also, this redirect URI must be exactly the same as the ones used in the environment variables of the function app.
+    redirect_uris = ["https://peps-email-labeling-app.azurewebsites.net/api/auth-callback"] # TODO: This name is actually dependent on the folder name of the function app. Also, this redirect URI must be exactly the same as the ones used in the environment variables of the function app.
     implicit_grant {
       access_token_issuance_enabled = true
       id_token_issuance_enabled     = true
