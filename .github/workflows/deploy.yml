@@ -44,20 +44,19 @@ jobs:
           # Create the deploy_dir where we will collect all the necessary files
           mkdir -p deploy_dir/azure_app
           
-          # Copy all necessary function app code and config
-          rsync -av --exclude='__pycache__' \
-                    --exclude='*.pyc' \
-                    --exclude='.venv' \
-                    --exclude='*.zip' \
-                    --exclude='local.settings.json' \
-                    --exclude='*.tf*' \
-                    . deploy_dir/azure_app/
+          # Copy core Azure Function files (adjust if you rename or relocate files)
+          cp function_app.py deploy_dir/azure_app/
+          cp host.json deploy_dir/azure_app/
+          cp requirements.txt deploy_dir/azure_app/
 
-          # Copy installed dependencies to the expected location
+          # Copy any shared modules (optional)
+          cp handle_emails.py deploy_dir/azure_app/ || true
+
+          # Create .python_packages directory and copy site-packages
           mkdir -p deploy_dir/azure_app/.python_packages/lib/site-packages
           cp -r ${{ env.PACKAGE_DIR }}/lib/site-packages/* deploy_dir/azure_app/.python_packages/lib/site-packages/
 
-          # Create zip from within the deploy_dir
+          # Zip from inside deploy_dir/azure_app to make the zip root correct
           cd deploy_dir/azure_app
           zip -r ../../${{ env.DEPLOYMENT_ZIP_NAME }} .
     
