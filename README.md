@@ -2,8 +2,9 @@
 Email labeling project
 
 # TODO's
-TODO: Figure out how the github workflow deployment actually works. It's kind of a mess now. Or at least, my understanding of it is.
-TODO: Create a login flow to authorize reading of mailboxes.
+TODO: 
+TODO: CI/CD is a mess, the project structure is a mess, the secret handling is a mess, the terraform 
+main.tf is a mess. Refactor step by step.
 
 # Prerequisites
 🔐 GitHub CLI Prerequisite: Authenticate to GitHub
@@ -167,3 +168,15 @@ which is a cli tool. Install it by:
 ```
 npm install -g azure-functions-core-tools@4 --unsafe-perm true
 ```
+
+
+### AZ function app
+To get started with azure functions, it is reccommendable to use the quickstart guide:
+https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-azure-developer-cli?pivots=programming-language-python&tabs=linux%2Cget%2Cbash%2Cpowershell
+
+It is highly recommendable to test the app locally first, and then push it later. 
+
+The current setup uses the o365 library to handle login flows and read emails. The authentication, 
+permissions and azure function configurations are the most difficult aspects of this project. 
+
+
