@@ -18,3 +18,4 @@ __pycache__
 .venv
 .env
 terraform.tfvars
+o365_token_data/*
