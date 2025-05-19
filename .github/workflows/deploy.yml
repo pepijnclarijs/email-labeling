@@ -45,23 +45,20 @@ jobs:
       - name: Create deployment package
         run: |
           # Create the deploy_dir where we will collect all the necessary files
-          mkdir -p deploy_dir/azure_app
+          mkdir -p ./azure_app
           
           # Copy core Azure Function files (adjust if you rename or relocate files)
-          cp function_app.py deploy_dir/azure_app/
-          cp host.json deploy_dir/azure_app/
-          cp requirements.txt deploy_dir/azure_app/
-
-          # Copy any shared modules (optional)
-          cp handle_emails.py deploy_dir/azure_app/ || true
+          cp function_app.py ./azure_app/
+          cp host.json ./azure_app/
+          cp requirements.txt ./azure_app/
 
           # Create .python_packages directory and copy site-packages
-          mkdir -p deploy_dir/azure_app/.python_packages/lib/site-packages
-          cp -r ${{ env.PACKAGE_DIR }}/lib/site-packages/* deploy_dir/azure_app/.python_packages/lib/site-packages/
+          mkdir -p ./azure_app/.python_packages/lib/site-packages
+          cp -r ${{ env.PACKAGE_DIR }}/lib/site-packages/* ./azure_app/.python_packages/lib/site-packages/
 
-          # Zip from inside deploy_dir/azure_app to make the zip root correct
-          cd deploy_dir/azure_app
-          zip -r ../../${{ env.DEPLOYMENT_ZIP_NAME }} .
+          # Zip from inside ./azure_app to make the zip root correct
+          cd ./azure_app
+          zip -r ${{ github.workspace }}/${{ env.DEPLOYMENT_ZIP_NAME }} .
     
 
       # 6. Log in to Azure using service principal credentials
@@ -91,5 +88,5 @@ jobs:
             az functionapp deployment source config-zip \
               --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
               --name ${{ env.AZURE_FUNCTION_APP_NAME }} \
-              --src ${{ env.DEPLOYMENT_ZIP_NAME }}
+              --src ${{ github.workspace }}/${{ env.DEPLOYMENT_ZIP_NAME }} 
   
