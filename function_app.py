@@ -44,6 +44,7 @@ def handle_is_authenticated():
     
     return func.HttpResponse(html_content, mimetype="text/html")
 
+@app.function_name(name="go-to-login")
 @app.route(route="go-to-login", auth_level=func.AuthLevel.ANONYMOUS)
 def go_to_login(req: func.HttpRequest) -> func.HttpResponse:
     account = _get_account()
@@ -62,6 +63,7 @@ def go_to_login(req: func.HttpRequest) -> func.HttpResponse:
 
     return func.HttpResponse(html_content, mimetype="text/html")
 
+@app.function_name(name="auth-callback")
 @app.route(route="auth-callback", auth_level=func.AuthLevel.ANONYMOUS)
 def login(req: func.HttpRequest) -> func.HttpResponse:
     account = _get_account()
@@ -91,6 +93,7 @@ def login(req: func.HttpRequest) -> func.HttpResponse:
 
     return func.HttpResponse(html_content, mimetype="text/html")
 
+@app.function_name(name="logout")
 @app.route(route="logout", auth_level=func.AuthLevel.ANONYMOUS)
 def logout(req: func.HttpRequest) -> func.HttpResponse:
     # remove the token.txt from token backend
@@ -104,6 +107,7 @@ def logout(req: func.HttpRequest) -> func.HttpResponse:
         html_content = '<h1>Logout failed</h1>'
     return func.HttpResponse(html_content, mimetype="text/html")
 
+@app.function_name(name="get-first-email")
 @app.route(route="get-first-email", auth_level=func.AuthLevel.ANONYMOUS)
 def get_first_email(req: func.HttpRequest) -> func.HttpResponse:
     account = _get_account()
