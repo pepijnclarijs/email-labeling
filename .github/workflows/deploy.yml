@@ -53,8 +53,8 @@ jobs:
           cp requirements.txt ./azure_app/
 
           # Create .python_packages directory and copy site-packages
-          mkdir -p ./azure_app/.python_packages/lib/site-packages
-          cp -r ${{ env.PACKAGE_DIR }}/lib/site-packages/* ./azure_app/.python_packages/lib/site-packages/
+          # mkdir -p ./azure_app/.python_packages/lib/site-packages
+          # cp -r ${{ env.PACKAGE_DIR }}/lib/site-packages/* ./azure_app/.python_packages/lib/site-packages/
 
           # Zip from inside ./azure_app to make the zip root correct
           cd ./azure_app
