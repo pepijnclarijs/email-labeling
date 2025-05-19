@@ -1,4 +1,5 @@
 annotated-types==0.7.0
+azure.functions==1.14.0
 anyio==4.9.0
 beautifulsoup4==4.13.4
 cachetools==5.5.2
