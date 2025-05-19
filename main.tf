@@ -1,7 +1,31 @@
+
 # Configures the Azure Resource Manager provider with the specified subscription
 provider "azurerm" {
   features {}
   subscription_id = "578cb0e7-8d21-4544-9b28-1360e9a76b9b"
+}
+
+# Define required GitHub-related variables
+variable "github_token" {
+  type        = string
+  sensitive   = true
+  description = "GitHub Personal Access Token with repo and admin:repo_hook permissions"
+}
+
+variable "github_owner" {
+  type        = string
+  description = "GitHub username or organization"
+}
+
+variable "github_repo" {
+  type        = string
+  description = "Name of the GitHub repository where secrets will be stored"
+}
+
+# GitHub provider for managing repo secrets
+provider "github" {
+  token = var.github_token
+  owner = var.github_owner
 }
 
 # Configures the Azure Active Directory provider (used for App Registration, etc.)
@@ -128,8 +152,7 @@ resource "azurerm_linux_function_app" "alfa" {
     "CLIENT_ID"                = azuread_application.email_app.client_id
     "CLIENT_SECRET"            = azuread_application_password.email_app_secret.value
     "TENANT_ID"                = data.azurerm_client_config.current.tenant_id
-    "REDIRECT_URI"             = "https://login.microsoftonline.com/common/oauth2/nativeclient"
-
+    "REDIRECT_URI"             = "http://localhost:7071/api/auth-callback"
   }
 
   site_config {
@@ -149,55 +172,33 @@ resource "azuread_application_password" "email_app_secret" {
 
 # Registers a new Azure AD Application (App Registration) for OAuth2 access to Microsoft Graph
 resource "azuread_application" "email_app" {
-  display_name = "EmailLabelingApp"
+  display_name     = "EmailLabelingApp"
+  sign_in_audience = "AzureADandPersonalMicrosoftAccount"
+
+  api {
+    mapped_claims_enabled          = true
+    requested_access_token_version = 2
+
+    oauth2_permission_scope {
+      admin_consent_description  = "Allow the application to access example on behalf of the signed-in user."
+      admin_consent_display_name = "Access example"
+      enabled                    = true
+      id                         = "891ab914-0b08-4ac9-8e38-b80b33d0e7c0" # Self generated UUID
+      type                       = "User"
+      user_consent_description   = "Allow the application to access example on your behalf."
+      user_consent_display_name  = "Access example"
+      value                      = "user_impersonation"
+    }
+  }
 
   web {
-    redirect_uris = ["https://login.microsoftonline.com/common/oauth2/nativeclient"] # TODO: This name is actually dependent on the folder name of the function app. Also, this redirect URI must be exactly the same as the ones used in the environment variables of the function app.
+    redirect_uris = ["http://localhost:7071/api/auth-callback"] # TODO: This name is actually dependent on the folder name of the function app. Also, this redirect URI must be exactly the same as the ones used in the environment variables of the function app.
     implicit_grant {
       access_token_issuance_enabled = true
       id_token_issuance_enabled     = true
     }
   }
 
-  # Requests delegated Mail.Read permission from Microsoft Graph
-  required_resource_access {
-    resource_app_id = data.azuread_application_published_app_ids.well_known.result["MicrosoftGraph"]
-
-    resource_access {
-      id   = azuread_service_principal.msgraph.app_role_ids["Mail.Read"]
-      type = "Scope"
-    }
-
-    resource_access {
-      id   = azuread_service_principal.msgraph.app_role_ids["Mail.ReadWrite"]
-      type = "Scope"
-    }
-
-    resource_access {
-      id   = azuread_service_principal.msgraph.app_role_ids["MailboxSettings.Read"]
-      type = "Scope"
-    }
-
-    resource_access {
-      id   = azuread_service_principal.msgraph.app_role_ids["Mail.Send"]
-      type = "Scope"
-    }
-    
-    resource_access {
-      id   = azuread_service_principal.msgraph.app_role_ids["MailboxSettings.Read"]
-      type = "Scope"
-    }
-
-    resource_access {
-      id   = azuread_service_principal.msgraph.app_role_ids["User.Read"]
-      type = "Scope"
-    }
-
-    resource_access {
-      id   = azuread_service_principal.msgraph.app_role_ids["offline_access"]
-      type = "Scope"
-    }
-  }
 }
 
 # --- For CI/CD with GitHub --- #
@@ -226,14 +227,15 @@ resource "azurerm_role_assignment" "github_actions_blob_data_contributor" {
   principal_id         = azuread_service_principal.github_actions_sp.object_id
 }
 
-# Outputs for GitHub Actions secrets
-output "github_actions_credentials_json" {
-  value = jsonencode({
+# (Optional) Store all credentials in a single JSON-formatted GitHub secret
+resource "github_actions_secret" "azure_credentials_json" {
+  repository  = var.github_repo
+  secret_name = "AZURE_CREDENTIALS"
+  plaintext_value = jsonencode({
     clientId                   = azuread_application.github_actions_app.client_id
     clientSecret               = azuread_application_password.github_actions_secret.value
     tenantId                   = data.azurerm_client_config.current.tenant_id
     subscriptionId             = data.azurerm_client_config.current.subscription_id
     resourceManagerEndpointUrl = "https://management.azure.com/"
   })
-  sensitive = true
 }

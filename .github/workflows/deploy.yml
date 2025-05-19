@@ -12,7 +12,7 @@ jobs:
       # Define environment variables for clarity and reuse
       PYTHON_VERSION: '3.12' # Ensure this matches your Azure Function runtime version
       PACKAGE_DIR: '.python_packages' # Standard directory for pre-installed packages
-      FUNCTION_APP_CODE_DIR: 'azure_app/http_request' # Adjust if your function code is elsewhere
+      FUNCTION_APP_CODE_DIR: '.' # Adjust if your function code is elsewhere
       DEPLOYMENT_ZIP_NAME: 'my-azure-function.zip' # Name of the zip file to create
       AZURE_STORAGE_ACCOUNT: 'emaillabelingstg' # Your Azure Storage account name
       AZURE_STORAGE_CONTAINER: 'functions' # Your Blob container name
@@ -30,19 +30,12 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      # 3. Install uv package manager
-      - name: Install uv
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
-
-      # 4. Install dependencies using uv into the required package directory
+      # 3. Install dependencies using pip into the required package directory
       # Azure Functions expect dependencies in .python_packages/lib/site-packages
-      - name: Install dependencies with uv
+      - name: Install dependencies with pip
         run: |
-          # Add uv to the path (installation script usually does this, but belt-and-suspenders)
-          source $HOME/.cargo/env
-
-          # Install dependencies defined in pyproject.toml into the target directory
-          uv pip install --target="${{ env.PACKAGE_DIR }}/lib/site-packages" .
+          python -m pip install --upgrade pip
+          python -m pip install --target="${{ env.PACKAGE_DIR }}/lib/site-packages" -r ${{ env.REQUIREMENTS_FILE }}
 
       # 5. Create the deployment zip package
       # Include the code, dependencies folder, host.json, pyproject.toml, uv.lock etc.
@@ -51,19 +44,22 @@ jobs:
           # Create the deploy_dir where we will collect all the necessary files
           mkdir -p deploy_dir/azure_app
           
-          # Copy all files from http_request into the azure_app directory, flattening the structure
-          cp -r ${{ env.FUNCTION_APP_CODE_DIR }}/* deploy_dir/azure_app/
-          
-          # Copy other necessary root files (host.json, pyproject.toml, uv.lock)
-          cp host.json pyproject.toml uv.lock deploy_dir/
-          
-          # Copy the dependencies folder (.python_packages) if it exists
-          cp -r ${{ env.PACKAGE_DIR }} deploy_dir/
-          
-          # Navigate to the deploy_dir and zip the contents
-          cd deploy_dir
-          zip -r ../${{ env.DEPLOYMENT_ZIP_NAME }} *
-          cd ..
+          # Copy all necessary function app code and config
+          rsync -av --exclude='__pycache__' \
+                    --exclude='*.pyc' \
+                    --exclude='.venv' \
+                    --exclude='*.zip' \
+                    --exclude='local.settings.json' \
+                    --exclude='*.tf*' \
+                    . deploy_dir/azure_app/
+
+          # Copy installed dependencies to the expected location
+          mkdir -p deploy_dir/azure_app/.python_packages/lib/site-packages
+          cp -r ${{ env.PACKAGE_DIR }}/lib/site-packages/* deploy_dir/azure_app/.python_packages/lib/site-packages/
+
+          # Create zip from within the deploy_dir
+          cd deploy_dir/azure_app
+          zip -r ../../${{ env.DEPLOYMENT_ZIP_NAME }} .
     
 
       # 6. Log in to Azure using service principal credentials
