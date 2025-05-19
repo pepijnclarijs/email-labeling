@@ -148,7 +148,8 @@ resource "azurerm_linux_function_app" "alfa" {
 
   app_settings = {
     "FUNCTIONS_WORKER_RUNTIME" = "python"
-    "WEBSITE_RUN_FROM_PACKAGE" = "https://${azurerm_storage_account.sa.name}.blob.core.windows.net/${azurerm_storage_container.functions.name}/${azurerm_storage_blob.function_zip.name}?${data.azurerm_storage_account_sas.function_sas.sas}"
+    # "WEBSITE_RUN_FROM_PACKAGE" = "https://${azurerm_storage_account.sa.name}.blob.core.windows.net/${azurerm_storage_container.functions.name}/${azurerm_storage_blob.function_zip.name}?${data.azurerm_storage_account_sas.function_sas.sas}"
+    "WEBSITE_RUN_FROM_PACKAGE" = "1"
     "CLIENT_ID"                = azuread_application.email_app.client_id
     "CLIENT_SECRET"            = azuread_application_password.email_app_secret.value
     "TENANT_ID"                = data.azurerm_client_config.current.tenant_id
@@ -235,6 +236,13 @@ resource "azuread_application_password" "github_actions_secret" {
 # Service Principal associated with the App Registration
 resource "azuread_service_principal" "github_actions_sp" {
   client_id = azuread_application.github_actions_app.client_id
+}
+
+# Assign function app contributor role to Service Principal for zip deployment
+resource "azurerm_role_assignment" "github_actions_function_app_contributor" {
+  scope                = azurerm_resource_group.rg.id
+  role_definition_name = "Contributor"          # or "Website Contributor" if you want finer granularity
+  principal_id         = azuread_service_principal.github_actions_sp.object_id
 }
 
 # Assign Storage Blob Data Contributor role to Service Principal
