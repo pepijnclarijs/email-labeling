@@ -183,3 +183,4 @@ permissions and azure function configurations are the most difficult aspects of 
 tried adding AzureWebJobsFeatureFlags=EnableWorkerIndexing to environment variables, but not working
 also tried: Azure: Enter PYTHON_ENABLE_WORKER_EXTENSIONS=1 in your app settings. (https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=get-started%2Casgi%2Capplication-level&pivots=python-mode-decorators#environment-variables)
 I have set SCM_DO_BUILD_DURING_DEPLOYMENT=true
+I added ENABLE_ORYX_BUILD=true in app settings env var.
