@@ -85,7 +85,7 @@ jobs:
 
       # 7. Deploy the zip package to the Azure Function App using Zip Deploy
       - name: Deploy Azure Function via Zip Deploy
-        uses: azure/CLI@v1
+        uses: azure/CLI@v2
         with:
           inlineScript: |
             az functionapp deployment source config-zip \
