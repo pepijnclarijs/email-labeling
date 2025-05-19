@@ -90,9 +90,3 @@ jobs:
               --name ${{ env.AZURE_FUNCTION_APP_NAME }} \
               --src ${{ github.workspace }}/${{ env.DEPLOYMENT_ZIP_NAME }} 
 
-      # 8. Save zip as artifact for debugging
-      - name: Upload zip artifact (for debugging)
-        uses: actions/upload-artifact@v3
-        with:
-          name: functionapp-package
-          path: ${{ github.workspace }}/${{ env.DEPLOYMENT_ZIP_NAME }}
