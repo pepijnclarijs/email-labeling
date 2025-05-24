@@ -5,6 +5,12 @@ provider "azurerm" {
   subscription_id = "578cb0e7-8d21-4544-9b28-1360e9a76b9b"
 }
 
+variable "google_api_key" {
+  description = "Google API Key for accessing Google services"
+  type        = string
+  sensitive   = true
+}
+
 # Define required GitHub-related variables
 variable "github_token" {
   type        = string
