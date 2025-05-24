@@ -260,7 +260,15 @@ resource "azurerm_role_assignment" "github_actions_blob_data_contributor" {
   principal_id         = azuread_service_principal.github_actions_sp.object_id
 }
 
-# (Optional) Store all credentials in a single JSON-formatted GitHub secret
+# Needed for zip deployment using azure cli
+resource "azurerm_role_assignment" "github_actions_website_contributor" {
+  scope                = azurerm_linux_function_app.alfa.id
+  role_definition_name = "Website Contributor"
+  principal_id         = azuread_service_principal.github_actions_sp.object_id
+}
+
+
+# Store all credentials in a single JSON-formatted GitHub secret
 resource "github_actions_secret" "azure_credentials_json" {
   repository  = var.github_repo
   secret_name = "AZURE_CREDENTIALS"
