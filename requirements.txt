@@ -1,4 +1,4 @@
 azure-functions
-# python-dotenv
-# O365
-# google-genai
+python-dotenv
+O365
+google-genai

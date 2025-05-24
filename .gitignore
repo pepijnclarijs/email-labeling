@@ -19,3 +19,4 @@ __pycache__
 .env
 terraform.tfvars
 o365_token_data/*
+for_zip/*
