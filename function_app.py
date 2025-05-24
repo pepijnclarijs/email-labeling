@@ -124,7 +124,7 @@ def logout(req: func.HttpRequest) -> func.HttpResponse:
         state_map["account"] = new_account
         html_content = '<h1>Logged out successfully!</h1><a href="/api/go-to-login">Login again</a>'
     else:
-        html_content = '<h1>Logout failed</h1>'
+        html_content = f'<h1>Logout failed</h1> {token_backend.delete_token()}'
     return func.HttpResponse(html_content, mimetype="text/html")
 
 @app.function_name(name="get-first-email")

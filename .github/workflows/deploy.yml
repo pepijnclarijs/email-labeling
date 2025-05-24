@@ -63,20 +63,6 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
 
-      # For debugging
-      - name: Show Azure Account Info
-        uses: azure/CLI@v2
-        with:
-          inlineScript: az account show
-        
-      # For debugging
-      - name: Show Access Token
-        uses: azure/CLI@v2
-        with:
-          inlineScript: |
-            az account get-access-token --resource https://management.azure.com/
-
-
       - name: Deploy to Azure Function App via Zip Deploy (with debug)
         uses: azure/CLI@v2
         with:
