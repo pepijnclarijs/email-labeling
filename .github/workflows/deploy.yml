@@ -64,21 +64,10 @@ jobs:
 
 
       # For debugging
-      - name: List deployment package contents
-        run: |
-          unzip -l ${{ env.ZIP_DIR }}/${{ env.ZIP_NAME }}
-
-      # For debugging
       - name: Show Azure Account Info
         uses: azure/CLI@v2
         with:
           inlineScript: az account show
-
-      - name: Manual login and sync function triggers
-        run: |
-          az functionapp sync-function-triggers \
-            --name ${{ env.FUNCTION_APP_NAME }} \
-            --resource-group ${{ env.RESOURCE_GROUP }}
 
 
       - name: Deploy to Azure Function App via Zip Deploy (with debug)
