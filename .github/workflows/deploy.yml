@@ -76,6 +76,23 @@ jobs:
           inlineScript: |
             az account get-access-token --resource https://management.azure.com/
 
+      # For debugging
+      - name: Debug Azure SP Role Assignments
+        shell: bash
+        run: |
+          echo "${{ secrets.AZURE_CREDENTIALS }}" > creds.json
+
+          CLIENT_ID=$(jq -r '.clientId' creds.json)
+          SUBSCRIPTION_ID=$(jq -r '.subscriptionId' creds.json)
+
+          echo "Client ID: $CLIENT_ID"
+          echo "Subscription ID: $SUBSCRIPTION_ID"
+
+          az role assignment list --assignee $CLIENT_ID --scope /subscriptions/$SUBSCRIPTION_ID/resourceGroups/${{ env.RESOURCE_GROUP }}/providers/Microsoft.Web/sites/${{ env.FUNCTION_APP_NAME }} --output json
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+
+
 
       - name: Deploy to Azure Function App via Zip Deploy (with debug)
         uses: azure/CLI@v2
