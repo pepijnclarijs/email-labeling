@@ -249,7 +249,7 @@ resource "azuread_service_principal" "github_actions_sp" {
 # Assign function app contributor role to Service Principal for zip deployment
 resource "azurerm_role_assignment" "github_actions_function_app_contributor" {
   scope                = azurerm_resource_group.rg.id
-  role_definition_name = "Contributor" # or "Website Contributor" if you want finer granularity
+  role_definition_name = "Owner" # or "Website Contributor" if you want finer granularity
   principal_id         = azuread_service_principal.github_actions_sp.object_id
 }
 
