@@ -49,10 +49,13 @@ jobs:
       - name: Create deployment zip
         run: |
           mkdir -p ${{ env.ZIP_DIR }}
-          cd ${{ env.ZIP_DIR }}
-          rm -f ${{ env.ZIP_NAME }}
+          rm -f ${{ env.ZIP_DIR }}/${{ env.ZIP_NAME }}
 
-          zip -r ${{ env.ZIP_NAME }} ../function_app.py ../host.json ../requirements.txt ../.python_packages > /dev/null
+          zip -r ${{ env.ZIP_DIR }}/${{ env.ZIP_NAME }} \
+            function_app.py \
+            host.json \
+            requirements.txt \
+            .python_packages/ > /dev/null
 
       - name: Login to Azure
         uses: azure/login@v1
