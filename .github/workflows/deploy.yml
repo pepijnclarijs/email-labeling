@@ -59,6 +59,10 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: List deployment package contents
+        run: |
+          unzip -l ${{ env.ZIP_DIR }}/${{ env.ZIP_NAME }}
+
       - name: Deploy to Azure Function App via Zip Deploy
         uses: azure/CLI@v2
         with:
