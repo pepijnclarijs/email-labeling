@@ -66,11 +66,14 @@ jobs:
         run: |
           unzip -l ${{ env.ZIP_DIR }}/${{ env.ZIP_NAME }}
 
-      - name: Deploy to Azure Function App via Zip Deploy
+      - name: Deploy to Azure Function App via Zip Deploy (with debug)
         uses: azure/CLI@v2
         with:
           inlineScript: |
+            set -x  # Print all commands (Bash)
             az functionapp deployment source config-zip \
-              -g ${{ env.RESOURCE_GROUP }} \
-              -n ${{ env.FUNCTION_APP_NAME }} \
+              --debug \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --name ${{ env.FUNCTION_APP_NAME }} \
               --src ${{ env.ZIP_DIR }}/${{ env.ZIP_NAME }}
+
