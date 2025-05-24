@@ -187,3 +187,6 @@ I added ENABLE_ORYX_BUILD=true in app settings env var.
 
 TODO: make local deployment sh script that zips the needed files into a deployment zip.
 TODO: ADD gemini_api_key automatically
+
+
+NOTE: I had to change the scope for the SP to specify the functionapp directly, not the resource group its in.
