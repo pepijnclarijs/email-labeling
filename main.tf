@@ -161,6 +161,7 @@ resource "azurerm_linux_function_app" "alfa" {
     "CLIENT_SECRET"                  = azuread_application_password.email_app_secret.value
     "TENANT_ID"                      = data.azurerm_client_config.current.tenant_id
     "REDIRECT_URI"                   = "https://peps-email-labeling-app.azurewebsites.net/api/auth-callback"
+    "GEMINI_API_KEY"                 = var.google_api_key
 
     # Application Insights integration
     "APPINSIGHTS_INSTRUMENTATIONKEY"        = azurerm_application_insights.app_insights.instrumentation_key
