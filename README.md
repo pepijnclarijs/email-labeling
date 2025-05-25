@@ -196,4 +196,4 @@ NOTE: I had to change the scope for the SP to specify the functionapp directly, 
 TODO: Explain the following concepts:
 *) The api and web blocks inside the azure ad email app registration
 *) Find out how much of application_insights is actually needed in order to check the logs.
-*) 
+*) Get a grip on SCM_DO_BUILD_DURING_DEPLOYMENT
