@@ -62,7 +62,6 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-
       - name: Deploy to Azure Function App via Zip Deploy (with debug)
         uses: azure/CLI@v2
         with:
@@ -73,4 +72,3 @@ jobs:
               --resource-group ${{ env.RESOURCE_GROUP }} \
               --name ${{ env.FUNCTION_APP_NAME }} \
               --src ${{ env.ZIP_DIR }}/${{ env.ZIP_NAME }}
-

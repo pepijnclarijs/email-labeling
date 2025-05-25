@@ -200,6 +200,7 @@ resource "azurerm_linux_function_app" "alfa" {
   app_settings = {
     "ENABLE_ORYX_BUILD"              = "true"
     "SCM_DO_BUILD_DURING_DEPLOYMENT" = "true"
+    "WEBSITE_RUN_FROM_PACKAGE"       = "1"
     "FUNCTIONS_WORKER_RUNTIME"       = "python"
     "AzureWebJobsFeatureFlags"       = "EnableWorkerIndexing"
     "CLIENT_ID"                      = azuread_application.email_app.client_id

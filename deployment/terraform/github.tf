@@ -26,16 +26,6 @@ provider "github" {
 # App Registration for GitHub Actions to deploy the Function App
 resource "azuread_application" "github_actions_app" {
   display_name = "GitHubActionsDeployer"
-
-  # TODO: test if these are necessary
-  # required_resource_access {
-  #   resource_app_id = "00000003-0000-0000-c000-000000000000" # Microsoft Graph API app ID
-
-  #   resource_access {
-  #     id   = "5778995a-e1bf-45b8-affa-663a9f3f4d04" # Directory.Read.All permission ID
-  #     type = "Role"                                 # "Role" means application permission, "Scope" means delegated
-  #   }
-  # }
 }
 
 # App Secret for GitHub Actions
