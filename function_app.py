@@ -36,6 +36,9 @@ SCOPES = [
     'https://graph.microsoft.com/Mail.ReadWrite',
     'https://graph.microsoft.com/Mail.Send'
 ]
+# Initialize the token backend
+if not os.path.exists('./o365_token_data'):
+    os.makedirs('./o365_token_data')
 token_backend = FileSystemTokenBackend(token_path='./o365_token_data', token_filename='token.txt')
 
 
