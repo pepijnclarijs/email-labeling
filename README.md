@@ -187,6 +187,13 @@ I added ENABLE_ORYX_BUILD=true in app settings env var.
 
 TODO: make local deployment sh script that zips the needed files into a deployment zip.
 TODO: ADD gemini_api_key automatically
-
+TODO: When deploying manually logout works fine, but when deploying via gh actions, it does not0...
 
 NOTE: I had to change the scope for the SP to specify the functionapp directly, not the resource group its in.
+
+
+
+TODO: Explain the following concepts:
+*) The api and web blocks inside the azure ad email app registration
+*) Find out how much of application_insights is actually needed in order to check the logs.
+*) 
