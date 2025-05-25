@@ -19,4 +19,4 @@ __pycache__
 .env
 terraform.tfvars
 o365_token_data/*
-./deployment/manual_deployment/build_artifacts/*
+deployment/manual_deployment/build_artifacts/*
